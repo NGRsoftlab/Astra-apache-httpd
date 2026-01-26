@@ -1,0 +1,32 @@
+## Example of SSL image
+## Be sure for installed openssl and apache2 packages
+
+## Definite image args
+ARG image_registry
+ARG image_name=httpd
+ARG image_version=2.4.65-astra1.8.x-slim
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                        Final image                          #
+#             First stage, compact optimize layer             #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+FROM ${image_registry}${image_name}:${image_version}
+
+## Create and prepare rootless
+RUN \
+    groupadd -r apache \
+    && useradd -r -g apache -d /var/www -s /sbin/nologin apache \
+    && chown -R apache:apache /var/www \
+    && chmod 755 /var/www
+
+## Copy SSL config
+COPY configuration/httpd-ssl.conf /etc/apache2/apache2.conf
+
+## Run session as unprivileged user
+USER apache
+
+## Be gentle and expose port
+EXPOSE 8080 8443
+
+## Run app
+CMD ["httpd-foreground"]

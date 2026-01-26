@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+## Apache gets grumpy about PID files pre-existing
+if [[ -f /run/apache2/httpd.pid ]]; then
+  rm -f /run/apache2/httpd.pid
+else
+  rm -rf /tmp/httpd.pid
+fi
+
+exec httpd -DFOREGROUND "$@"
